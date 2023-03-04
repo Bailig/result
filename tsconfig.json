@@ -16,7 +16,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "CommonJS",
     "composite": true,
     "lib": ["ESNext", "dom"],
     "allowSyntheticDefaultImports": true,
