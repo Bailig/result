@@ -13,7 +13,6 @@ describe("success()", () => {
     const result = success(1) as Result<number, never>;
     expect(result.unwrap()).toBe(1);
     expect(result.unwrapOr(2)).toBe(1);
-    expect(result.unwrapOrElse(() => 2)).toBe(1);
     expect(result.expect("test")).toBe(1);
   });
 
@@ -24,7 +23,6 @@ describe("success()", () => {
       value: number;
       unwrap: () => number;
       unwrapOr: () => number;
-      unwrapOrElse: () => number;
       expect: () => number;
     }>();
   });
@@ -42,8 +40,6 @@ describe("fail()", () => {
     const result = fail(new Error("test"));
     expect(() => result.unwrap()).toThrowError("test");
     expect(result.unwrapOr(2)).toBe(2);
-    expect(result.unwrapOrElse(() => 2)).toBe(2);
-    result.unwrapOrElse((error) => expect(error.message).toBe("test"));
     expect(() => result.expect("test")).toThrowError("test");
   });
 
@@ -54,7 +50,6 @@ describe("fail()", () => {
       error: Error;
       unwrap: () => never;
       unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
-      unwrapOrElse: <TReturn>(onError: (error: Error) => TReturn) => TReturn;
       expect: (message: string) => never;
     }>();
   });
