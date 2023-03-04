@@ -1,9 +1,9 @@
-import { describe, it, expect, expectTypeOf } from "vitest";
+import { describe, it, expect, expectTypeOf, assertType } from "vitest";
 import { fail, success } from "./result";
 import { Err } from "./typed-error";
 
-const getSession = (): any => {};
-const db: any = {};
+const getSession = (): any => ({ get: () => "userId" });
+const db: any = { users: { find: () => "user" } };
 
 const getUser = () => {
   const session = getSession();
@@ -21,7 +21,7 @@ const getUser = () => {
     return fail(new Err({ type: "noUser" as const, data: 123 }));
   }
 
-  return success(user);
+  return success(user as "user");
 };
 
 describe("getUser()", () => {
@@ -36,5 +36,11 @@ describe("getUser()", () => {
         expectTypeOf(result.error.data).toEqualTypeOf<number>();
       }
     }
+  });
+
+  it("should infer type of result for each methods", () => {
+    assertType<"user">(getUser().unwrap());
+    assertType<"user" | "default">(getUser().unwrapOr("default"));
+    assertType<"user">(getUser().expect("message"));
   });
 });

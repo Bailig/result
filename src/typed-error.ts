@@ -20,7 +20,6 @@ export class TypedError<
   data: TOptions["data"];
   constructor(options: TOptions) {
     super(options.message);
-    this.name = "ResultError";
     this.type = options.type;
     this.data = options.data;
   }
