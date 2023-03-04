@@ -51,7 +51,7 @@ describe("fail()", () => {
       success: false;
       fail: true;
       error: Error;
-      ok: () => void;
+      ok: () => undefined;
       unwrap: () => never;
       unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
       expect: (message: string) => never;

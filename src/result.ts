@@ -12,14 +12,14 @@ export type Fail<TError> = {
   success: false;
   fail: true;
   error: TError;
-  ok: () => void;
+  ok: () => undefined;
   unwrap: () => never;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
   expect: (message: string) => never;
 };
 
 export type ResultMethods<TValue, TError> = {
-  ok: () => void | TValue;
+  ok: () => undefined | TValue;
   unwrap: () => TValue;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TValue | TDefault;
   expect: (message: string) => TValue;
@@ -48,7 +48,9 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
     success: false,
     fail: true,
     error,
-    ok: () => {},
+    ok: () => {
+      return undefined;
+    },
     unwrap: () => {
       throw error;
     },
