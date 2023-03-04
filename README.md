@@ -91,3 +91,14 @@ if (result.fail) {
   }
 }
 ```
+
+# Using Result with Async/Await
+
+The result helper can be used wrap async functions to return a Promise Result.
+
+```ts
+import { r } from "@bylg/result";
+
+const result = await r(fetchUser());
+//      ^? const result: Result<User, Error>
+```

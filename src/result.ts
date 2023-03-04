@@ -61,3 +61,16 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
     },
   };
 };
+
+export const result = async <TValue>(
+  promise: Promise<TValue>
+): Promise<Result<TValue, Error>> => {
+  try {
+    const value = await promise;
+    return success(value);
+  } catch (error) {
+    return fail(error as any);
+  }
+};
+
+export const r = result;

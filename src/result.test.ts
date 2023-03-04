@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
-import { success, fail, Result } from "./result";
+import { success, fail, Result, r } from "./result";
 
 describe("success()", () => {
   it("should have properties", () => {
@@ -83,6 +83,43 @@ describe("parseNumber()", () => {
 
   it("should return fail", () => {
     const result = parseNumber("a");
+    expect(result.success).toBe(false);
+    expect(result.fail).toBe(true);
+
+    // @ts-expect-error
+    result.error;
+
+    if (result.fail) {
+      expect(result.error.message).toBe("Not a number");
+    }
+  });
+});
+
+const fetchUser = async (success: boolean): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(
+      () => (success ? resolve("John") : reject(new Error("Not a number"))),
+      0
+    );
+  });
+};
+
+describe("result()", () => {
+  it("should return success", async () => {
+    const result = await r(fetchUser(true));
+    expect(result.success).toBe(true);
+    expect(result.fail).toBe(false);
+
+    // @ts-expect-error
+    result.value;
+
+    if (result.success) {
+      expect(result.value).toBe("John");
+    }
+  });
+
+  it("should return fail", async () => {
+    const result = await r(fetchUser(false));
     expect(result.success).toBe(false);
     expect(result.fail).toBe(true);
 
