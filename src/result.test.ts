@@ -11,6 +11,7 @@ describe("success()", () => {
 
   it("should have correct methods", () => {
     const result = success(1) as Result<number, never>;
+    expect(result.ok()).toBe(1);
     expect(result.unwrap()).toBe(1);
     expect(result.unwrapOr(2)).toBe(1);
     expect(result.expect("test")).toBe(1);
@@ -21,6 +22,7 @@ describe("success()", () => {
       success: true;
       fail: false;
       value: number;
+      ok: () => number;
       unwrap: () => number;
       unwrapOr: () => number;
       expect: () => number;
@@ -31,6 +33,7 @@ describe("success()", () => {
 describe("fail()", () => {
   it("should have properties", () => {
     const result = fail(new Error("test"));
+    expect(result.ok()).toBe(undefined);
     expect(result.success).toBe(false);
     expect(result.fail).toBe(true);
     expect(result.error.message).toBe("test");
@@ -48,6 +51,7 @@ describe("fail()", () => {
       success: false;
       fail: true;
       error: Error;
+      ok: () => void;
       unwrap: () => never;
       unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
       expect: (message: string) => never;

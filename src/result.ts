@@ -2,6 +2,7 @@ export type Success<TValue> = {
   success: true;
   fail: false;
   value: TValue;
+  ok: () => TValue;
   unwrap: () => TValue;
   unwrapOr: () => TValue;
   expect: () => TValue;
@@ -11,12 +12,14 @@ export type Fail<TError> = {
   success: false;
   fail: true;
   error: TError;
+  ok: () => void;
   unwrap: () => never;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
   expect: (message: string) => never;
 };
 
 export type ResultMethods<TValue, TError> = {
+  ok: () => void | TValue;
   unwrap: () => TValue;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TValue | TDefault;
   expect: (message: string) => TValue;
@@ -33,6 +36,7 @@ export const success = <TValue>(value: TValue): Success<TValue> => {
     success: true,
     fail: false,
     value,
+    ok: () => value,
     unwrap: () => value,
     unwrapOr: () => value,
     expect: () => value,
@@ -44,6 +48,7 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
     success: false,
     fail: true,
     error,
+    ok: () => {},
     unwrap: () => {
       throw error;
     },

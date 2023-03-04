@@ -39,6 +39,7 @@ describe("getUser()", () => {
   });
 
   it("should infer type of result for each methods", () => {
+    assertType<"user" | void>(getUser().ok());
     assertType<"user">(getUser().unwrap());
     assertType<"user" | "default">(getUser().unwrapOr("default"));
     assertType<"user">(getUser().expect("message"));
