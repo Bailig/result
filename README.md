@@ -11,9 +11,9 @@ npm install @bylg/result
 ## Quick Start
 
 ```ts
-import { success, fail } from "@bylg/result";
+import { success, fail, Result } from "@bylg/result";
 
-const parseNumber = (input: string) => {
+const parseNumber = (input: string): Result<number, Error> => {
   const result = Number(input);
   if (isNaN(result)) {
     return fail(new Error(`"${input}" is not a number`));
@@ -48,20 +48,24 @@ const result3 = parseNumber("42").unwrapOr("default"); // this will ignore the e
 
 const result4 = parseNumber("42").expect("error message"); // this will throw the error with the error message
 //      ^? const result4: number
-```
 
-## Using map and mapErr
+// The map and mapError methods can be used to transform the value or error.
+const result5 = parseNumber("42").map((value) => String(value));
+//      ^? const result5: Result<string, Error>
 
-The map and mapErr methods can be used to transform the value or error.
-
-```ts
-const result = parseNumber("42").map((value) => String(value));
-//      ^? const result: Fail<Error> | Success<string>
-
-const result2 = parseNumber("abc").mapError(
-  //    ^? const result2: Success<number> | Fail<TypeError>
+const result6 = parseNumber("42").mapError(
+  //    ^? const result6: Result<number, TypeError>
   (error) => new TypeError(error.message)
 );
+
+// The andThen method can be used to chain operations that return a Result.
+const result7 = parseNumber("42").andThen((value) => {
+  //    ^? const result7: Result<string, Error>
+  if (value > 100) {
+    return fail(new Error(`"${value}" is too big`));
+  }
+  return success(String(value));
+});
 ```
 
 ## Using Result with Typed Errors
@@ -71,23 +75,28 @@ TypedError is a utility type that can be used to create an error with a string l
 ```ts
 import { success, fail, TypedError as Err } from "@bylg/result";
 
-const getUser = () => {
+type GetUserError =
+  | Err<{ type: "notLoggedIn"; data: string }>
+  | Err<{ type: "noUserId"; data: boolean }>
+  | Err<{ type: "noUser"; data: number }>;
+
+const getUser = (): Result<User, GetUserError> => {
   const session = getSession();
   if (!session) {
-    return fail(new Err({ type: "notLoggedIn" as const, data: "string" }));
+    return fail(new Err({ type: "notLoggedIn", data: "string" }));
   }
 
   const userId = session.get("userId");
   if (!userId) {
-    return fail(new Err({ type: "noUserId" as const, data: false }));
+    return fail(new Err({ type: "noUserId", data: false }));
   }
 
   const user = db.users.find(userId);
   if (!user) {
-    return fail(new Err({ type: "noUser" as const, data: 123 }));
+    return fail(new Err({ type: "noUser", data: 123 }));
   }
 
-  return success(user as "user");
+  return success(user);
 };
 
 const result = getUser();
