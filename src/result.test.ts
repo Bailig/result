@@ -6,42 +6,32 @@ describe("success()", () => {
     const result = success(1);
     expect(result.success).toBe(true);
     expect(result.fail).toBe(false);
-    expect(result.value).toBe(1);
+    if (result.success) {
+      expect(result.value).toBe(1);
+    }
   });
 
   it("should have correct methods", () => {
-    const result = success(1) as Result<number, never>;
+    const result = success(1);
+
     expect(result.ok()).toBe(1);
     expect(result.unwrap()).toBe(1);
-    expect(result.unwrapOr(2)).toBe(1);
-    expect(result.expect("test")).toBe(1);
+    expect(result.unwrapOr("")).toBe(1);
+    expect(result.expect("")).toBe(1);
     expect(result.map((value) => value + 1).unwrap()).toBe(2);
-  });
-
-  it("should have correct type", () => {
-    expectTypeOf(success(1)).toEqualTypeOf<{
-      success: true;
-      fail: false;
-      value: number;
-      ok: () => number;
-      unwrap: () => number;
-      unwrapOr: () => number;
-      expect: () => number;
-      map: <TNewValue>(
-        mapper: (value: number) => TNewValue
-      ) => Success<TNewValue>;
-      mapError: () => Success<number>;
-    }>();
+    expect(result.mapError(() => new Error("")).unwrap()).toBe(1);
+    expect(result.andThen((value) => success(value + 1)).unwrap()).toBe(2);
   });
 });
 
 describe("fail()", () => {
   it("should have properties", () => {
     const result = fail(new Error("test"));
-    expect(result.ok()).toBe(undefined);
     expect(result.success).toBe(false);
     expect(result.fail).toBe(true);
-    expect(result.error.message).toBe("test");
+    if (result.fail) {
+      expect(result.error.message).toBe("test");
+    }
   });
 
   it("should have correct methods", () => {
@@ -49,23 +39,13 @@ describe("fail()", () => {
     expect(() => result.unwrap()).toThrowError("test");
     expect(result.unwrapOr(2)).toBe(2);
     expect(() => result.expect("test")).toThrowError("test");
-    expect(() => result.map().unwrap()).toThrowError("test");
-  });
-
-  it("should have correct type", () => {
-    expectTypeOf(fail(new Error("test"))).toEqualTypeOf<{
-      success: false;
-      fail: true;
-      error: Error;
-      ok: () => undefined;
-      unwrap: () => never;
-      unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
-      expect: (message: string) => never;
-      map: () => Fail<Error>;
-      mapError: <TNewError extends Error>(
-        mapper: (error: Error) => TNewError
-      ) => Fail<TNewError>;
-    }>();
+    expect(() => result.map(() => {}).unwrap()).toThrowError("test");
+    expect(() =>
+      result.mapError(() => new Error("test2")).unwrap()
+    ).toThrowError("test2");
+    expect(() => result.andThen(() => success(1)).unwrap()).toThrowError(
+      "test"
+    );
   });
 });
 
@@ -177,5 +157,11 @@ describe("Result type", () => {
       return new TypeError("test");
     });
     assertType<Result<number, TypeError>>(mappedErrorResult);
+
+    const andThenResult = result.andThen((value) => {
+      assertType<number>(value);
+      return success(value + 1);
+    });
+    assertType<Result<number, Error>>(andThenResult);
   });
 });

@@ -8,6 +8,9 @@ export type Success<TValue> = {
   expect: () => TValue;
   map: <TNewValue>(mapper: (value: TValue) => TNewValue) => Success<TNewValue>;
   mapError: () => Success<TValue>;
+  andThen: <TNewValue, TNewError extends Error>(
+    mapper: (value: TValue) => Result<TNewValue, TNewError>
+  ) => Result<TNewValue, TNewError>;
 };
 
 export type Fail<TError> = {
@@ -22,6 +25,7 @@ export type Fail<TError> = {
   mapError: <TNewError extends Error>(
     mapper: (error: TError) => TNewError
   ) => Fail<TNewError>;
+  andThen: () => Fail<TError>;
 };
 
 export type ResultMethods<TValue, TError> = {
@@ -35,6 +39,9 @@ export type ResultMethods<TValue, TError> = {
   mapError: <TNewError extends Error>(
     mapper: (error: TError) => TNewError
   ) => Result<TValue, TNewError>;
+  andThen: <TNewValue, TNewError extends Error>(
+    mapper: (value: TValue) => Result<TNewValue, TNewError>
+  ) => Result<TNewValue, TNewError>;
 };
 
 export type Result<TValue, TError> = (
@@ -43,7 +50,7 @@ export type Result<TValue, TError> = (
 ) &
   ResultMethods<TValue, TError>;
 
-export const success = <TValue>(value: TValue): Success<TValue> => {
+export const success = <TValue>(value: TValue): Result<TValue, never> => {
   return {
     success: true,
     fail: false,
@@ -54,10 +61,13 @@ export const success = <TValue>(value: TValue): Success<TValue> => {
     expect: () => value,
     map: (mapper) => success(mapper(value)),
     mapError: () => success(value),
+    andThen: (mapper) => mapper(value),
   };
 };
 
-export const fail = <TError extends Error>(error: TError): Fail<TError> => {
+export const fail = <TError extends Error>(
+  error: TError
+): Result<never, TError> => {
   return {
     success: false,
     fail: true,
@@ -75,6 +85,7 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
     },
     map: () => fail(error),
     mapError: (mapper) => fail(mapper(error)),
+    andThen: () => fail(error as any),
   };
 };
 
