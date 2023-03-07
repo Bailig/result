@@ -30,6 +30,7 @@ describe("success()", () => {
       map: <TNewValue>(
         mapper: (value: number) => TNewValue
       ) => Success<TNewValue>;
+      mapError: () => Success<number>;
     }>();
   });
 });
@@ -61,6 +62,9 @@ describe("fail()", () => {
       unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
       expect: (message: string) => never;
       map: () => Fail<Error>;
+      mapError: <TNewError extends Error>(
+        mapper: (error: Error) => TNewError
+      ) => Fail<TNewError>;
     }>();
   });
 });
@@ -167,5 +171,11 @@ describe("Result type", () => {
       return String(value);
     });
     assertType<Result<string, Error>>(mappedResult);
+
+    const mappedErrorResult = result.mapError((error) => {
+      assertType<Error>(error);
+      return new TypeError("test");
+    });
+    assertType<Result<number, TypeError>>(mappedErrorResult);
   });
 });

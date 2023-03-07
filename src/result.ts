@@ -7,6 +7,7 @@ export type Success<TValue> = {
   unwrapOr: () => TValue;
   expect: () => TValue;
   map: <TNewValue>(mapper: (value: TValue) => TNewValue) => Success<TNewValue>;
+  mapError: () => Success<TValue>;
 };
 
 export type Fail<TError> = {
@@ -18,6 +19,9 @@ export type Fail<TError> = {
   unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
   expect: (message: string) => never;
   map: () => Fail<TError>;
+  mapError: <TNewError extends Error>(
+    mapper: (error: TError) => TNewError
+  ) => Fail<TNewError>;
 };
 
 export type ResultMethods<TValue, TError> = {
@@ -28,6 +32,9 @@ export type ResultMethods<TValue, TError> = {
   map: <TNewValue>(
     mapper: (value: TValue) => TNewValue
   ) => Result<TNewValue, TError>;
+  mapError: <TNewError extends Error>(
+    mapper: (error: TError) => TNewError
+  ) => Result<TValue, TNewError>;
 };
 
 export type Result<TValue, TError> = (
@@ -46,6 +53,7 @@ export const success = <TValue>(value: TValue): Success<TValue> => {
     unwrapOr: () => value,
     expect: () => value,
     map: (mapper) => success(mapper(value)),
+    mapError: () => success(value),
   };
 };
 
@@ -66,6 +74,7 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
       throw error;
     },
     map: () => fail(error),
+    mapError: (mapper) => fail(mapper(error)),
   };
 };
 
@@ -76,7 +85,7 @@ export const result = async <TValue>(
     const value = await promise;
     return success(value);
   } catch (error) {
-    return fail(error as any);
+    return fail(error as Error);
   }
 };
 
