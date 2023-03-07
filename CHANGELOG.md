@@ -1,5 +1,11 @@
 # @bylg/result
 
+## 0.0.4
+
+### Patch Changes
+
+- 7151345: added unwrapOrElse
+
 ## 0.0.3
 
 ### Patch Changes
