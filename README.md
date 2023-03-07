@@ -46,20 +46,26 @@ const result2 = parseNumber("42").unwrap(); // this will throw the error
 const result3 = parseNumber("42").unwrapOr("default"); // this will ignore the error and return the "default"
 //      ^? const result3: number | "default"
 
-const result4 = parseNumber("42").expect("error message"); // this will throw the error with the error message
+// if fail, this will return the result of the function
+const result4 = parseNumber("42").unwrapOrElse((error) => {
+  //    ^? const result4: string | number
+  return "some value";
+});
+
+const result5 = parseNumber("42").expect("error message"); // this will throw the error with the error message
 //      ^? const result4: number
 
 // The map and mapError methods can be used to transform the value or error.
-const result5 = parseNumber("42").map((value) => String(value));
+const result6 = parseNumber("42").map((value) => String(value));
 //      ^? const result5: Result<string, Error>
 
-const result6 = parseNumber("42").mapError(
+const result7 = parseNumber("42").mapError(
   //    ^? const result6: Result<number, TypeError>
   (error) => new TypeError(error.message)
 );
 
 // The andThen method can be used to chain operations that return a Result.
-const result7 = parseNumber("42").andThen((value) => {
+const result8 = parseNumber("42").andThen((value) => {
   //    ^? const result7: Result<string, Error>
   if (value > 100) {
     return fail(new Error(`"${value}" is too big`));

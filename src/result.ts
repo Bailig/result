@@ -5,6 +5,7 @@ export type Success<TValue> = {
   ok: () => TValue;
   unwrap: () => TValue;
   unwrapOr: () => TValue;
+  unwrapOrElse: () => TValue;
   expect: () => TValue;
   map: <TNewValue>(mapper: (value: TValue) => TNewValue) => Success<TNewValue>;
   mapError: () => Success<TValue>;
@@ -20,6 +21,7 @@ export type Fail<TError> = {
   ok: () => undefined;
   unwrap: () => never;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
+  unwrapOrElse: <TNewValue>(fn: (error: TError) => TNewValue) => TNewValue;
   expect: (message: string) => never;
   map: () => Fail<TError>;
   mapError: <TNewError extends Error>(
@@ -32,6 +34,9 @@ export type ResultMethods<TValue, TError> = {
   ok: () => undefined | TValue;
   unwrap: () => TValue;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TValue | TDefault;
+  unwrapOrElse: <TNewValue>(
+    fn: (error: TError) => TNewValue
+  ) => TValue | TNewValue;
   expect: (message: string) => TValue;
   map: <TNewValue>(
     mapper: (value: TValue) => TNewValue
@@ -58,6 +63,7 @@ export const success = <TValue>(value: TValue): Result<TValue, never> => {
     ok: () => value,
     unwrap: () => value,
     unwrapOr: () => value,
+    unwrapOrElse: () => value as any,
     expect: () => value,
     map: (mapper) => success(mapper(value)),
     mapError: () => success(value),
@@ -79,6 +85,7 @@ export const fail = <TError extends Error>(
       throw error;
     },
     unwrapOr: <TDefault>(defaultValue: TDefault) => defaultValue,
+    unwrapOrElse: <TNewValue>(fn: (error: TError) => TNewValue) => fn(error),
     expect: (message: string) => {
       error.message = message;
       throw error;

@@ -40,12 +40,20 @@ describe("fail()", () => {
     expect(result.unwrapOr(2)).toBe(2);
     expect(() => result.expect("test")).toThrowError("test");
     expect(() => result.map(() => {}).unwrap()).toThrowError("test");
-    expect(() =>
-      result.mapError(() => new Error("test2")).unwrap()
-    ).toThrowError("test2");
     expect(() => result.andThen(() => success(1)).unwrap()).toThrowError(
       "test"
     );
+    const mappedError = result.mapError((error) => {
+      expect(error.message).toBe("test");
+      return new Error("test2");
+    });
+    expect(() => mappedError.unwrap()).toThrowError("test2");
+
+    const elseValue = result.unwrapOrElse((error) => {
+      expect(error.message).toBe("test");
+      return "2";
+    });
+    expect(elseValue).toBe("2");
   });
 });
 
@@ -145,6 +153,12 @@ describe("Result type", () => {
     assertType<string | number>(result.unwrapOr("2"));
     assertType<number>(result.expect("test"));
     assertType<number | undefined>(result.ok());
+
+    const elseValue = result.unwrapOrElse((error) => {
+      assertType<Error>(error);
+      return "2";
+    });
+    assertType<string | number>(elseValue);
 
     const mappedResult = result.map((value) => {
       assertType<number>(value);
