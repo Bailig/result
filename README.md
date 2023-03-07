@@ -50,6 +50,20 @@ const result4 = parseNumber("42").expect("error message"); // this will throw th
 //      ^? const result4: number
 ```
 
+## Using map and mapErr
+
+The map and mapErr methods can be used to transform the value or error.
+
+```ts
+const result = parseNumber("42").map((value) => String(value));
+//      ^? const result: Fail<Error> | Success<string>
+
+const result2 = parseNumber("abc").mapError(
+  //    ^? const result2: Success<number> | Fail<TypeError>
+  (error) => new TypeError(error.message)
+);
+```
+
 ## Using Result with Typed Errors
 
 TypedError is a utility type that can be used to create an error with a string literal type property, so that the error can be checked and inferred.
