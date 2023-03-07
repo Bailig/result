@@ -6,6 +6,7 @@ export type Success<TValue> = {
   unwrap: () => TValue;
   unwrapOr: () => TValue;
   expect: () => TValue;
+  map: <TNewValue>(mapper: (value: TValue) => TNewValue) => Success<TNewValue>;
 };
 
 export type Fail<TError> = {
@@ -16,6 +17,7 @@ export type Fail<TError> = {
   unwrap: () => never;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TDefault;
   expect: (message: string) => never;
+  map: () => Fail<TError>;
 };
 
 export type ResultMethods<TValue, TError> = {
@@ -23,6 +25,9 @@ export type ResultMethods<TValue, TError> = {
   unwrap: () => TValue;
   unwrapOr: <TDefault>(defaultValue: TDefault) => TValue | TDefault;
   expect: (message: string) => TValue;
+  map: <TNewValue>(
+    mapper: (value: TValue) => TNewValue
+  ) => Result<TNewValue, TError>;
 };
 
 export type Result<TValue, TError> = (
@@ -40,6 +45,7 @@ export const success = <TValue>(value: TValue): Success<TValue> => {
     unwrap: () => value,
     unwrapOr: () => value,
     expect: () => value,
+    map: (mapper) => success(mapper(value)),
   };
 };
 
@@ -59,6 +65,7 @@ export const fail = <TError extends Error>(error: TError): Fail<TError> => {
       error.message = message;
       throw error;
     },
+    map: () => fail(error),
   };
 };
 
