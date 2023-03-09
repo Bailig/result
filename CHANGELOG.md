@@ -1,5 +1,11 @@
 # @bylg/result
 
+## 0.0.5
+
+### Patch Changes
+
+- 451ced2: removed fail must receive an error type
+
 ## 0.0.4
 
 ### Patch Changes
